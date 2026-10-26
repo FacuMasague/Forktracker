@@ -1,8 +1,14 @@
 #include <Arduino.h>
 #include <math.h>
 
-const uint8_t SENSOR1_PIN = A0; // Sensor inferior
-const uint8_t SENSOR2_PIN = A1; // Sensor superior
+#if !defined(CONFIG_IDF_TARGET_ESP32C3)
+#error "Seleccionar una placa ESP32-C3 en el entorno Arduino-ESP32."
+#endif
+
+// ESP32-C3 Super Mini: entradas ADC1, con las senales previamente adaptadas.
+const uint8_t SENSOR1_PIN = 0; // Hall A1325 inferior, ADC1_CH0
+const uint8_t SENSOR2_PIN = 1; // Hall A1325 superior, ADC1_CH1
+const uint8_t RESOLUCION_ADC_BITS = 12;
 
 const unsigned long SERIAL_BAUD = 460800UL; // Velocidad con la que los datos se envian
 const unsigned long SAMPLE_INTERVAL_US = 1000UL; // Intervalo entre muestras, en microsegundos
@@ -172,6 +178,13 @@ void enviarEventos(unsigned long tiempoUs) {
 }
 
 void setup() {
+  analogReadResolution(RESOLUCION_ADC_BITS);
+
+  // En el C3, 11 dB permite medir aproximadamente hasta 2,5 V; no protege de 5 V.
+  analogSetPinAttenuation(SENSOR1_PIN, ADC_11db);
+  analogSetPinAttenuation(SENSOR2_PIN, ADC_11db);
+
+  // Para usar el USB de la placa, habilitar "USB CDC On Boot" al compilar.
   Serial.begin(SERIAL_BAUD);
   Serial.println("tiempo_us,intervalo_us,raw1,raw2,calibrando,calibrado,posicion_mm");
 
