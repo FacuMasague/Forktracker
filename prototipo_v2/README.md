@@ -56,9 +56,12 @@ tiempo_us,intervalo_us,raw1,raw2,calibrando,calibrado,posicion_mm
 #ORIGEN,tiempo_us
 ```
 
+En `#CAL`, `tiempo_inicio_us` es el `tiempo_us` de la primera muestra de la
+calibracion y `tiempo_fin_us` el de la muestra en que termino; ambos coinciden
+con filas transmitidas.
+
 La placa transmite estas lineas; no guarda archivos por si sola. El receptor
-debe separar las mediciones y los eventos y contemplar reinicios y el desborde
-del contador `micros()` de 32 bits.
+de la computadora esta en [`../receptor`](../receptor/README.md).
 
 ## Fuentes
 

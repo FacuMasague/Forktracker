@@ -57,14 +57,14 @@ void inicioCalibracion() {
   seguimientoIniciado = false;
   ceroPendiente = false;
   posicionMM = 0.0f;
-
-  inicioCalibracionUs = micros();
 }
 
 // Actualiza la calibracion, registra maximos y minimos.
-void actualizarCalibracion(int raw1, int raw2) {
+void actualizarCalibracion(int raw1, int raw2, unsigned long tiempoUs) {
   // La primera muestra inicializa los limites sin asumir el rango del ADC.
+  // El inicio se toma de esa muestra para que coincida con una fila transmitida.
   if (primeraMuestraCalibracion) {
+    inicioCalibracionUs = tiempoUs;
     min1 = max1 = raw1;
     min2 = max2 = raw2;
     primeraMuestraCalibracion = false;
@@ -94,6 +94,7 @@ void terminarCalibracion() {
   cero1 = (static_cast<float>(max1) + min1) / 2.0f;
   cero2 = (static_cast<float>(max2) + min2) / 2.0f;
 
+  // La validacion anterior garantiza amplitud > 0 antes de dividir.
   escala1 = 1.0f / amplitud1;
   escala2 = 1.0f / amplitud2;
   
@@ -210,7 +211,7 @@ void loop() {
   int raw2 = analogRead(SENSOR2_PIN);
 
   if (calibrando) {
-    actualizarCalibracion(raw1, raw2);
+    actualizarCalibracion(raw1, raw2, nowUs);
 
     if (nowUs - inicioCalibracionUs >= CALIBRATION_DURATION_US) {
       terminarCalibracion();
